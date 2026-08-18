@@ -1,0 +1,1213 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CloudTree</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: light-dark(#f7f8fb, #111318);
+      --panel: light-dark(#ffffff, #191d24);
+      --panel-2: light-dark(#eef3f7, #242a33);
+      --text: light-dark(#1b1f27, #eef1f5);
+      --muted: light-dark(#637083, #9aa5b3);
+      --line: light-dark(#d9e0ea, #313945);
+      --primary: light-dark(#146b73, #3cc3be);
+      --primary-soft: light-dark(#d7f0ee, #173d43);
+      --accent: light-dark(#b65a25, #ffaf62);
+      --green: light-dark(#287c46, #77c67d);
+      --blue: light-dark(#2e62ac, #82aaff);
+      --purple: light-dark(#7b4bb1, #c6a3ff);
+      --yellow: light-dark(#947118, #e7c65c);
+      --danger: light-dark(#a33c35, #ff8980);
+      --shadow: light-dark(0 14px 36px rgba(27, 31, 39, .09), 0 20px 46px rgba(0, 0, 0, .32));
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      border-color: color-mix(in srgb, var(--primary) 58%, var(--line));
+      background: color-mix(in srgb, var(--panel) 78%, var(--primary-soft));
+    }
+
+    button:disabled {
+      color: var(--muted);
+      cursor: not-allowed;
+      opacity: .72;
+    }
+
+    button.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: light-dark(#ffffff, #061012);
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      padding: 0 12px;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel) 88%, transparent);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--yellow) 68%, transparent), transparent 32%),
+        linear-gradient(135deg, var(--primary), var(--blue));
+      color: light-dark(#ffffff, #071012);
+      box-shadow: var(--shadow);
+    }
+
+    .logo svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .pathline {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: min(52vw, 720px);
+    }
+
+    .actions,
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .stats {
+      padding: 16px 22px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .stat span {
+      color: var(--muted);
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(340px, 43%) minmax(0, 1fr);
+      gap: 16px;
+      padding: 0 22px 22px;
+      min-height: 0;
+    }
+
+    .pane {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) 150px 132px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .breadcrumb {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel-2) 54%, transparent);
+    }
+
+    .crumb {
+      min-height: 30px;
+      padding: 0 10px;
+      border-radius: 7px;
+      font-size: 13px;
+    }
+
+    .crumb-sep {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      max-height: calc(100vh - 265px);
+      min-height: 420px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+      font-size: 14px;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: var(--panel);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    tr:hover td {
+      background: color-mix(in srgb, var(--primary-soft) 48%, transparent);
+    }
+
+    .name-cell {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .name-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      display: inline-grid;
+      place-items: center;
+      color: var(--primary);
+    }
+
+    .size-cell,
+    .count-cell {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .bar {
+      height: 7px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--muted) 22%, transparent);
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      min-width: 1px;
+    }
+
+    .visual-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel-2) 54%, transparent);
+    }
+
+    .visual-head h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .visual-head span {
+      color: var(--muted);
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .treemap-shell {
+      position: relative;
+      min-height: 420px;
+      height: calc(100vh - 265px);
+      background:
+        linear-gradient(90deg, color-mix(in srgb, var(--line) 38%, transparent) 1px, transparent 1px),
+        linear-gradient(0deg, color-mix(in srgb, var(--line) 38%, transparent) 1px, transparent 1px);
+      background-size: 34px 34px;
+    }
+
+    #treemap {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .empty {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .empty strong {
+      color: var(--text);
+      display: block;
+      margin-bottom: 6px;
+      font-size: 18px;
+    }
+
+    .dropzone {
+      outline: 2px dashed var(--primary);
+      outline-offset: -10px;
+      background: color-mix(in srgb, var(--primary-soft) 35%, transparent);
+    }
+
+    .status {
+      padding: 0 22px 14px;
+      min-height: 28px;
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .progress {
+      flex: 1 1 180px;
+      max-width: 360px;
+      height: 8px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--muted) 22%, transparent);
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress.active {
+      display: block;
+    }
+
+    .progress div {
+      width: 28%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--green), var(--accent));
+      animation: slide 1.1s infinite ease-in-out;
+    }
+
+    .tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 10;
+      max-width: 300px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      font-size: 12px;
+      display: none;
+    }
+
+    .tooltip strong {
+      display: block;
+      margin-bottom: 4px;
+      overflow-wrap: anywhere;
+    }
+
+    .tooltip span {
+      color: var(--muted);
+      display: block;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .hide {
+      display: none !important;
+    }
+
+    @keyframes slide {
+      0% { transform: translateX(-115%); }
+      55% { transform: translateX(265%); }
+      100% { transform: translateX(265%); }
+    }
+
+    @media (max-width: 980px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .pathline {
+        max-width: calc(100vw - 44px);
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .table-wrap,
+      .treemap-shell {
+        height: auto;
+        max-height: none;
+        min-height: 380px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar,
+      .stats,
+      .workspace,
+      .status {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .actions,
+      .filters {
+        width: 100%;
+      }
+
+      .actions button,
+      .filters button {
+        flex: 1 1 150px;
+      }
+
+      th:nth-child(3),
+      td:nth-child(3) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none">
+            <path d="M17 46h31a10 10 0 0 0 1.8-19.8A17 17 0 0 0 17.2 22 12 12 0 0 0 17 46Z" fill="currentColor" opacity=".92"/>
+            <path d="M25 44V28m0 0h14m-14 0 7-7m7 7-7-7M32 44V21" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".45"/>
+          </svg>
+        </div>
+        <div>
+          <h1>CloudTree</h1>
+          <div id="currentPath" class="pathline">Belum ada folder dipilih</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="chooseFolder" class="primary" type="button" aria-label="Pilih folder">Pilih Folder</button>
+        <button id="chooseFallback" type="button" aria-label="Pilih dari input browser">Upload Folder</button>
+        <button id="resetView" type="button" disabled>Reset</button>
+        <input id="folderInput" class="hide" type="file" webkitdirectory directory multiple>
+      </div>
+    </header>
+
+    <section class="stats" aria-label="Ringkasan">
+      <div class="stat">
+        <span>Total ukuran</span>
+        <strong id="totalSize">0 B</strong>
+      </div>
+      <div class="stat">
+        <span>File</span>
+        <strong id="fileCount">0</strong>
+      </div>
+      <div class="stat">
+        <span>Folder</span>
+        <strong id="folderCount">0</strong>
+      </div>
+      <div class="stat">
+        <span>File terbesar</span>
+        <strong id="largestFile">-</strong>
+      </div>
+    </section>
+
+    <div class="status" aria-live="polite">
+      <span id="statusText">Siap</span>
+      <div id="progress" class="progress" aria-hidden="true"><div></div></div>
+    </div>
+
+    <section class="workspace">
+      <div class="pane">
+        <div class="toolbar">
+          <input id="searchBox" type="search" placeholder="Cari nama file atau folder" aria-label="Cari nama file atau folder" disabled>
+          <select id="sortBy" aria-label="Urutkan" disabled>
+            <option value="size">Ukuran terbesar</option>
+            <option value="name">Nama A-Z</option>
+            <option value="type">Tipe</option>
+          </select>
+          <select id="viewMode" aria-label="Tampilkan" disabled>
+            <option value="all">Semua</option>
+            <option value="folders">Folder saja</option>
+            <option value="files">File saja</option>
+          </select>
+        </div>
+
+        <div class="panel">
+          <nav id="breadcrumb" class="breadcrumb" aria-label="Breadcrumb"></nav>
+          <div class="table-wrap">
+            <table>
+              <colgroup>
+                <col>
+                <col style="width: 132px">
+                <col style="width: 102px">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th class="size-cell">Ukuran</th>
+                  <th class="count-cell">Isi</th>
+                </tr>
+              </thead>
+              <tbody id="itemRows">
+                <tr>
+                  <td colspan="3" class="muted">Pilih folder untuk mulai.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="panel">
+          <div class="visual-head">
+            <div>
+              <h2>Treemap</h2>
+              <span id="treemapLabel">Menunggu data</span>
+            </div>
+            <div class="filters">
+              <button id="upFolder" type="button" disabled>Naik</button>
+            </div>
+          </div>
+          <div id="treemapShell" class="treemap-shell">
+            <canvas id="treemap"></canvas>
+            <div id="emptyState" class="empty">
+              <div>
+                <strong>CloudTree</strong>
+                <span>Analisis ukuran folder berjalan lokal di browser.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="tooltip" class="tooltip" role="tooltip"></div>
+
+  <script>
+    const state = {
+      root: null,
+      current: null,
+      rects: [],
+      hover: null,
+      scanToken: 0,
+      largestFile: null
+    };
+
+    const els = {
+      chooseFolder: document.getElementById('chooseFolder'),
+      chooseFallback: document.getElementById('chooseFallback'),
+      folderInput: document.getElementById('folderInput'),
+      resetView: document.getElementById('resetView'),
+      currentPath: document.getElementById('currentPath'),
+      totalSize: document.getElementById('totalSize'),
+      fileCount: document.getElementById('fileCount'),
+      folderCount: document.getElementById('folderCount'),
+      largestFile: document.getElementById('largestFile'),
+      statusText: document.getElementById('statusText'),
+      progress: document.getElementById('progress'),
+      searchBox: document.getElementById('searchBox'),
+      sortBy: document.getElementById('sortBy'),
+      viewMode: document.getElementById('viewMode'),
+      breadcrumb: document.getElementById('breadcrumb'),
+      itemRows: document.getElementById('itemRows'),
+      treemap: document.getElementById('treemap'),
+      treemapShell: document.getElementById('treemapShell'),
+      treemapLabel: document.getElementById('treemapLabel'),
+      emptyState: document.getElementById('emptyState'),
+      upFolder: document.getElementById('upFolder'),
+      tooltip: document.getElementById('tooltip')
+    };
+
+    const ctx = els.treemap.getContext('2d');
+    const colors = {
+      light: ['#146b73', '#b65a25', '#287c46', '#2e62ac', '#7b4bb1', '#947118'],
+      dark: ['#3cc3be', '#ffaf62', '#77c67d', '#82aaff', '#c6a3ff', '#e7c65c']
+    };
+
+    function formatBytes(bytes) {
+      if (!bytes) return '0 B';
+      const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+      const idx = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+      const value = bytes / Math.pow(1024, idx);
+      return `${value >= 10 || idx === 0 ? value.toFixed(0) : value.toFixed(1)} ${units[idx]}`;
+    }
+
+    function formatCount(value) {
+      return new Intl.NumberFormat('id-ID').format(value || 0);
+    }
+
+    function setBusy(isBusy, text) {
+      els.statusText.textContent = text;
+      els.progress.classList.toggle('active', isBusy);
+      els.chooseFolder.disabled = isBusy;
+      els.chooseFallback.disabled = isBusy;
+      els.resetView.disabled = isBusy || !state.root;
+    }
+
+    function setControlsEnabled(enabled) {
+      els.searchBox.disabled = !enabled;
+      els.sortBy.disabled = !enabled;
+      els.viewMode.disabled = !enabled;
+      els.resetView.disabled = !enabled;
+    }
+
+    function makeNode(name, kind, path, parent = null) {
+      return {
+        name,
+        kind,
+        path,
+        parent,
+        size: 0,
+        files: 0,
+        folders: kind === 'folder' ? 1 : 0,
+        children: [],
+        ext: kind === 'file' && name.includes('.') ? name.split('.').pop().toLowerCase() : ''
+      };
+    }
+
+    function attachChild(parent, child) {
+      child.parent = parent;
+      parent.children.push(child);
+      return child;
+    }
+
+    async function scanDirectory(handle, parentPath, parentNode, token, counters) {
+      for await (const entry of handle.values()) {
+        if (token !== state.scanToken) return;
+        const childPath = `${parentPath}/${entry.name}`;
+        try {
+          if (entry.kind === 'file') {
+            const file = await entry.getFile();
+            const node = attachChild(parentNode, makeNode(entry.name, 'file', childPath, parentNode));
+            node.size = file.size;
+            node.files = 1;
+            counters.files += 1;
+            counters.bytes += file.size;
+            if (!state.largestFile || node.size > state.largestFile.size) state.largestFile = node;
+          } else if (entry.kind === 'directory') {
+            const node = attachChild(parentNode, makeNode(entry.name, 'folder', childPath, parentNode));
+            counters.folders += 1;
+            await scanDirectory(entry, childPath, node, token, counters);
+            rollup(node);
+          }
+        } catch (error) {
+          counters.skipped += 1;
+        }
+        counters.seen += 1;
+        if (counters.seen % 80 === 0) {
+          setBusy(true, `Memindai ${formatCount(counters.seen)} item... ${formatBytes(counters.bytes)}`);
+          await new Promise(requestAnimationFrame);
+        }
+      }
+    }
+
+    function rollup(node) {
+      if (node.kind === 'file') return node;
+      node.size = 0;
+      node.files = 0;
+      node.folders = 1;
+      for (const child of node.children) {
+        node.size += child.size;
+        node.files += child.files;
+        node.folders += child.kind === 'folder' ? child.folders : 0;
+      }
+      node.children.sort((a, b) => b.size - a.size || a.name.localeCompare(b.name));
+      return node;
+    }
+
+    async function chooseFolder() {
+      if (!window.showDirectoryPicker) {
+        els.folderInput.click();
+        return;
+      }
+      try {
+        const handle = await window.showDirectoryPicker({ mode: 'read' });
+        const token = ++state.scanToken;
+        state.largestFile = null;
+        const root = makeNode(handle.name, 'folder', handle.name);
+        const counters = { seen: 0, files: 0, folders: 1, bytes: 0, skipped: 0 };
+        setBusy(true, `Memindai ${handle.name}...`);
+        setControlsEnabled(false);
+        await scanDirectory(handle, handle.name, root, token, counters);
+        if (token !== state.scanToken) return;
+        rollup(root);
+        loadTree(root, counters.skipped);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          setBusy(false, `Gagal membuka folder: ${error.message}`);
+        } else {
+          setBusy(false, 'Siap');
+        }
+      }
+    }
+
+    async function loadFromInput(files) {
+      if (!files.length) return;
+      const token = ++state.scanToken;
+      state.largestFile = null;
+      const firstPath = files[0].webkitRelativePath || files[0].name;
+      const rootName = firstPath.split('/')[0] || 'Folder';
+      const root = makeNode(rootName, 'folder', rootName);
+      const dirs = new Map([[rootName, root]]);
+      const counters = { seen: 0, files: 0, folders: 1, bytes: 0, skipped: 0 };
+      setBusy(true, `Memindai ${rootName}...`);
+      setControlsEnabled(false);
+
+      for (const file of files) {
+        if (token !== state.scanToken) return;
+        const relative = file.webkitRelativePath || file.name;
+        const parts = relative.split('/').filter(Boolean);
+        let cursor = root;
+        let currentPath = rootName;
+        for (let i = 1; i < parts.length - 1; i += 1) {
+          currentPath = `${currentPath}/${parts[i]}`;
+          if (!dirs.has(currentPath)) {
+            const dir = attachChild(cursor, makeNode(parts[i], 'folder', currentPath, cursor));
+            dirs.set(currentPath, dir);
+            counters.folders += 1;
+          }
+          cursor = dirs.get(currentPath);
+        }
+        const node = attachChild(cursor, makeNode(parts[parts.length - 1], 'file', relative, cursor));
+        node.size = file.size;
+        node.files = 1;
+        counters.files += 1;
+        counters.bytes += file.size;
+        counters.seen += 1;
+        if (!state.largestFile || node.size > state.largestFile.size) state.largestFile = node;
+        if (counters.seen % 250 === 0) {
+          setBusy(true, `Memproses ${formatCount(counters.seen)} file... ${formatBytes(counters.bytes)}`);
+          await new Promise(requestAnimationFrame);
+        }
+      }
+
+      for (const node of Array.from(dirs.values()).sort((a, b) => b.path.length - a.path.length)) {
+        rollup(node);
+      }
+      loadTree(root, 0);
+      els.folderInput.value = '';
+    }
+
+    function loadTree(root, skipped) {
+      state.root = root;
+      state.current = root;
+      setControlsEnabled(true);
+      setBusy(false, skipped ? `Selesai. ${formatCount(skipped)} item dilewati oleh browser/izin OS.` : 'Selesai');
+      renderAll();
+    }
+
+    function renderAll() {
+      updateStats();
+      renderBreadcrumb();
+      renderTable();
+      resizeCanvas();
+    }
+
+    function updateStats() {
+      const root = state.root;
+      els.totalSize.textContent = root ? formatBytes(root.size) : '0 B';
+      els.fileCount.textContent = root ? formatCount(root.files) : '0';
+      els.folderCount.textContent = root ? formatCount(root.folders) : '0';
+      els.largestFile.textContent = state.largestFile ? formatBytes(state.largestFile.size) : '-';
+      els.currentPath.textContent = state.current ? state.current.path : 'Belum ada folder dipilih';
+      els.treemapLabel.textContent = state.current ? `${state.current.name} - ${formatBytes(state.current.size)}` : 'Menunggu data';
+      els.upFolder.disabled = !state.current || !state.current.parent;
+      els.emptyState.classList.toggle('hide', Boolean(state.root));
+    }
+
+    function getAncestors(node) {
+      const list = [];
+      let cursor = node;
+      while (cursor) {
+        list.unshift(cursor);
+        cursor = cursor.parent;
+      }
+      return list;
+    }
+
+    function renderBreadcrumb() {
+      els.breadcrumb.textContent = '';
+      if (!state.current) {
+        const span = document.createElement('span');
+        span.className = 'muted';
+        span.textContent = 'Belum ada folder';
+        els.breadcrumb.appendChild(span);
+        return;
+      }
+      getAncestors(state.current).forEach((node, index, arr) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'crumb';
+        button.textContent = index === 0 ? node.name : node.name;
+        button.disabled = node === state.current;
+        button.addEventListener('click', () => openNode(node));
+        els.breadcrumb.appendChild(button);
+        if (index < arr.length - 1) {
+          const sep = document.createElement('span');
+          sep.className = 'crumb-sep';
+          sep.textContent = '/';
+          els.breadcrumb.appendChild(sep);
+        }
+      });
+    }
+
+    function filteredChildren() {
+      if (!state.current) return [];
+      const term = els.searchBox.value.trim().toLowerCase();
+      const mode = els.viewMode.value;
+      let rows = state.current.children.filter((child) => {
+        const modeOk = mode === 'all' || (mode === 'folders' && child.kind === 'folder') || (mode === 'files' && child.kind === 'file');
+        const termOk = !term || child.name.toLowerCase().includes(term) || child.path.toLowerCase().includes(term);
+        return modeOk && termOk;
+      });
+      if (els.sortBy.value === 'name') {
+        rows = rows.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (els.sortBy.value === 'type') {
+        rows = rows.sort((a, b) => a.kind.localeCompare(b.kind) || b.size - a.size);
+      } else {
+        rows = rows.sort((a, b) => b.size - a.size || a.name.localeCompare(b.name));
+      }
+      return rows;
+    }
+
+    function renderTable() {
+      els.itemRows.textContent = '';
+      const rows = filteredChildren();
+      if (!state.current) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="3" class="muted">Pilih folder untuk mulai.</td>';
+        els.itemRows.appendChild(tr);
+        return;
+      }
+      if (!rows.length) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="3" class="muted">Tidak ada item yang cocok.</td>';
+        els.itemRows.appendChild(tr);
+        return;
+      }
+      const max = Math.max(...rows.map((row) => row.size), 1);
+      const frag = document.createDocumentFragment();
+      rows.slice(0, 600).forEach((node) => {
+        const tr = document.createElement('tr');
+        tr.dataset.path = node.path;
+        tr.innerHTML = `
+          <td>
+            <div class="name-cell">
+              <span class="icon" aria-hidden="true">${node.kind === 'folder' ? folderIcon() : fileIcon()}</span>
+              <span class="name-text"></span>
+            </div>
+            <div class="bar" aria-hidden="true"><div class="bar-fill" style="width:${Math.max(1, (node.size / max) * 100)}%"></div></div>
+          </td>
+          <td class="size-cell">${formatBytes(node.size)}</td>
+          <td class="count-cell">${node.kind === 'folder' ? formatCount(node.children.length) : node.ext || '-'}</td>
+        `;
+        tr.querySelector('.name-text').textContent = node.name;
+        tr.addEventListener('dblclick', () => {
+          if (node.kind === 'folder') openNode(node);
+        });
+        tr.addEventListener('click', () => highlightNode(node));
+        frag.appendChild(tr);
+      });
+      els.itemRows.appendChild(frag);
+    }
+
+    function folderIcon() {
+      return '<svg viewBox="0 0 24 24" fill="none"><path d="M3 7.8c0-1.1.9-2 2-2h5l2 2h7c1.1 0 2 .9 2 2v7.4c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V7.8Z" fill="currentColor" opacity=".86"/></svg>';
+    }
+
+    function fileIcon() {
+      return '<svg viewBox="0 0 24 24" fill="none"><path d="M6 3h8l4 4v14H6V3Z" fill="currentColor" opacity=".72"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.6"/></svg>';
+    }
+
+    function openNode(node) {
+      if (!node || node.kind !== 'folder') return;
+      state.current = node;
+      state.hover = null;
+      hideTooltip();
+      renderAll();
+    }
+
+    function highlightNode(node) {
+      const rect = state.rects.find((item) => item.node === node);
+      state.hover = rect || null;
+      drawTreemap();
+    }
+
+    function isDarkTheme() {
+      return matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    function treemapColor(index, depth) {
+      const palette = isDarkTheme() ? colors.dark : colors.light;
+      const base = palette[index % palette.length];
+      return depth ? mixHex(base, isDarkTheme() ? '#111318' : '#ffffff', 0.2) : base;
+    }
+
+    function mixHex(hex, otherHex, amount) {
+      const a = parseHex(hex);
+      const b = parseHex(otherHex);
+      const mix = a.map((value, index) => Math.round(value * (1 - amount) + b[index] * amount));
+      return `rgb(${mix[0]}, ${mix[1]}, ${mix[2]})`;
+    }
+
+    function parseHex(hex) {
+      const value = hex.replace('#', '');
+      return [
+        parseInt(value.slice(0, 2), 16),
+        parseInt(value.slice(2, 4), 16),
+        parseInt(value.slice(4, 6), 16)
+      ];
+    }
+
+    function getCanvasColor(name, fallback) {
+      const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return value && !value.includes('light-dark') ? value : fallback;
+    }
+
+    function resizeCanvas() {
+      const rect = els.treemapShell.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      els.treemap.width = Math.max(1, Math.floor(rect.width * dpr));
+      els.treemap.height = Math.max(1, Math.floor(rect.height * dpr));
+      els.treemap.style.width = `${rect.width}px`;
+      els.treemap.style.height = `${rect.height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      layoutTreemap(rect.width, rect.height);
+      drawTreemap();
+    }
+
+    function layoutTreemap(width, height) {
+      state.rects = [];
+      if (!state.current || !state.current.children.length || !state.current.size) return;
+      const children = filteredChildren()
+        .filter((child) => child.size > 0)
+        .slice(0, 180);
+      sliceDice(children, 0, 0, width, height, 0, state.rects);
+    }
+
+    function sliceDice(nodes, x, y, width, height, depth, out) {
+      if (!nodes.length || width < 3 || height < 3) return;
+      const total = nodes.reduce((sum, node) => sum + node.size, 0);
+      let offset = 0;
+      const horizontal = width >= height;
+      nodes.forEach((node, index) => {
+        const share = total ? node.size / total : 0;
+        const length = (horizontal ? width : height) * share;
+        const rect = horizontal
+          ? { x: x + offset, y, w: length, h: height }
+          : { x, y: y + offset, w: width, h: length };
+        offset += length;
+        const padded = {
+          node,
+          x: rect.x + 1,
+          y: rect.y + 1,
+          w: Math.max(0, rect.w - 2),
+          h: Math.max(0, rect.h - 2),
+          depth,
+          colorIndex: index
+        };
+        out.push(padded);
+        if (node.kind === 'folder' && node.children.length && padded.w > 95 && padded.h > 70) {
+          const topChildren = node.children.filter((child) => child.size > 0).slice(0, 18);
+          sliceDice(topChildren, padded.x + 5, padded.y + 22, padded.w - 10, padded.h - 27, depth + 1, out);
+        }
+      });
+    }
+
+    function drawTreemap() {
+      const shellRect = els.treemapShell.getBoundingClientRect();
+      ctx.clearRect(0, 0, shellRect.width, shellRect.height);
+      if (!state.rects.length) return;
+
+      state.rects.forEach((rect) => {
+        const node = rect.node;
+        const color = treemapColor(rect.colorIndex, rect.depth);
+        ctx.globalAlpha = rect.depth ? 0.52 : 0.82;
+        ctx.fillStyle = color;
+        ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = getCanvasColor('--bg', isDarkTheme() ? '#111318' : '#f7f8fb');
+        ctx.lineWidth = 1;
+        ctx.strokeRect(rect.x + .5, rect.y + .5, Math.max(0, rect.w - 1), Math.max(0, rect.h - 1));
+
+        if (rect.w > 64 && rect.h > 26) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(rect.x, rect.y, rect.w, rect.h);
+          ctx.clip();
+          ctx.fillStyle = lightTextColor();
+          ctx.font = '600 12px Inter, system-ui, sans-serif';
+          ctx.fillText(node.name, rect.x + 7, rect.y + 16, rect.w - 14);
+          if (rect.h > 44) {
+            ctx.font = '12px Inter, system-ui, sans-serif';
+            ctx.globalAlpha = .88;
+            ctx.fillText(formatBytes(node.size), rect.x + 7, rect.y + 33, rect.w - 14);
+          }
+          ctx.restore();
+        }
+      });
+
+      if (state.hover) {
+        ctx.save();
+        ctx.strokeStyle = getCanvasColor('--text', isDarkTheme() ? '#eef1f5' : '#1b1f27');
+        ctx.lineWidth = 3;
+        ctx.strokeRect(state.hover.x + 1.5, state.hover.y + 1.5, Math.max(0, state.hover.w - 3), Math.max(0, state.hover.h - 3));
+        ctx.restore();
+      }
+    }
+
+    function lightTextColor() {
+      return isDarkTheme() ? '#061012' : '#ffffff';
+    }
+
+    function canvasPoint(event) {
+      const rect = els.treemap.getBoundingClientRect();
+      return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    }
+
+    function findRectAt(point) {
+      for (let i = state.rects.length - 1; i >= 0; i -= 1) {
+        const rect = state.rects[i];
+        if (point.x >= rect.x && point.x <= rect.x + rect.w && point.y >= rect.y && point.y <= rect.y + rect.h) {
+          return rect;
+        }
+      }
+      return null;
+    }
+
+    function showTooltip(rect, event) {
+      const node = rect.node;
+      const percent = state.current && state.current.size ? (node.size / state.current.size) * 100 : 0;
+      els.tooltip.innerHTML = `<strong></strong><span>${formatBytes(node.size)} - ${percent.toFixed(percent >= 10 ? 0 : 1)}% dari tampilan</span><span>${node.kind === 'folder' ? `${formatCount(node.files)} file` : node.path}</span>`;
+      els.tooltip.querySelector('strong').textContent = node.name;
+      els.tooltip.style.display = 'block';
+      const pad = 14;
+      const tooltipRect = els.tooltip.getBoundingClientRect();
+      const x = Math.min(window.innerWidth - tooltipRect.width - pad, event.clientX + pad);
+      const y = Math.min(window.innerHeight - tooltipRect.height - pad, event.clientY + pad);
+      els.tooltip.style.left = `${Math.max(pad, x)}px`;
+      els.tooltip.style.top = `${Math.max(pad, y)}px`;
+    }
+
+    function hideTooltip() {
+      els.tooltip.style.display = 'none';
+    }
+
+    function resetApp() {
+      state.scanToken += 1;
+      state.root = null;
+      state.current = null;
+      state.rects = [];
+      state.hover = null;
+      state.largestFile = null;
+      els.searchBox.value = '';
+      els.sortBy.value = 'size';
+      els.viewMode.value = 'all';
+      setControlsEnabled(false);
+      setBusy(false, 'Siap');
+      renderAll();
+      renderTable();
+    }
+
+    els.chooseFolder.addEventListener('click', chooseFolder);
+    els.chooseFallback.addEventListener('click', () => els.folderInput.click());
+    els.folderInput.addEventListener('change', (event) => loadFromInput(Array.from(event.target.files || [])));
+    els.resetView.addEventListener('click', resetApp);
+    els.searchBox.addEventListener('input', () => {
+      renderTable();
+      resizeCanvas();
+    });
+    els.sortBy.addEventListener('change', () => {
+      renderTable();
+      resizeCanvas();
+    });
+    els.viewMode.addEventListener('change', () => {
+      renderTable();
+      resizeCanvas();
+    });
+    els.upFolder.addEventListener('click', () => {
+      if (state.current && state.current.parent) openNode(state.current.parent);
+    });
+
+    els.treemap.addEventListener('mousemove', (event) => {
+      const rect = findRectAt(canvasPoint(event));
+      if (rect !== state.hover) {
+        state.hover = rect;
+        drawTreemap();
+      }
+      if (rect) showTooltip(rect, event);
+      else hideTooltip();
+    });
+
+    els.treemap.addEventListener('mouseleave', () => {
+      state.hover = null;
+      hideTooltip();
+      drawTreemap();
+    });
+
+    els.treemap.addEventListener('click', (event) => {
+      const rect = findRectAt(canvasPoint(event));
+      if (rect && rect.node.kind === 'folder') openNode(rect.node);
+    });
+
+    ['dragenter', 'dragover'].forEach((eventName) => {
+      document.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        els.treemapShell.classList.add('dropzone');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach((eventName) => {
+      document.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        els.treemapShell.classList.remove('dropzone');
+      });
+    });
+
+    window.addEventListener('resize', resizeCanvas);
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawTreemap);
+    renderAll();
+  </script>
+</body>
+</html>
