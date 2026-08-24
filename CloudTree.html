@@ -1077,12 +1077,13 @@
           ctx.rect(rect.x, rect.y, rect.w, rect.h);
           ctx.clip();
           ctx.fillStyle = lightTextColor();
-          ctx.font = '600 12px Inter, system-ui, sans-serif';
-          ctx.fillText(node.name, rect.x + 7, rect.y + 16, rect.w - 14);
-          if (rect.h > 44) {
+          ctx.font = '700 12px Inter, system-ui, sans-serif';
+          const nameLines = wrapCanvasText(node.name, rect.x + 7, rect.y + 16, rect.w - 14, 14, Math.min(4, Math.max(1, Math.floor((rect.h - 24) / 14))));
+          const sizeY = rect.y + 16 + (nameLines * 14) + 3;
+          if (rect.h > sizeY - rect.y + 8) {
             ctx.font = '12px Inter, system-ui, sans-serif';
             ctx.globalAlpha = .88;
-            ctx.fillText(formatBytes(node.size), rect.x + 7, rect.y + 33, rect.w - 14);
+            ctx.fillText(formatBytes(node.size), rect.x + 7, sizeY);
           }
           ctx.restore();
         }
@@ -1099,6 +1100,76 @@
 
     function lightTextColor() {
       return isDarkTheme() ? '#061012' : '#ffffff';
+    }
+
+    function wrapCanvasText(text, x, y, maxWidth, lineHeight, maxLines) {
+      const lines = getWrappedCanvasLines(text, maxWidth, maxLines);
+      lines.forEach((line, index) => {
+        ctx.fillText(line, x, y + (index * lineHeight));
+      });
+      return lines.length;
+    }
+
+    function getWrappedCanvasLines(text, maxWidth, maxLines) {
+      const source = String(text).replace(/\s+/g, ' ').trim();
+      const words = source.split(' ');
+      const lines = [];
+      let line = '';
+      let consumed = 0;
+
+      for (const word of words) {
+        const attempt = line ? `${line} ${word}` : word;
+        if (ctx.measureText(attempt).width <= maxWidth) {
+          line = attempt;
+          consumed += word.length + (line === word ? 0 : 1);
+          continue;
+        }
+
+        if (line) {
+          lines.push(line);
+          line = '';
+          if (lines.length >= maxLines) break;
+        }
+
+        if (ctx.measureText(word).width <= maxWidth) {
+          line = word;
+          consumed += word.length + 1;
+          continue;
+        }
+
+        let chunk = '';
+        for (const char of word) {
+          const nextChunk = chunk + char;
+          if (ctx.measureText(nextChunk).width <= maxWidth || !chunk) {
+            chunk = nextChunk;
+          } else {
+            lines.push(chunk);
+            chunk = char;
+            if (lines.length >= maxLines) break;
+          }
+          consumed += 1;
+        }
+
+        if (lines.length >= maxLines) {
+          line = '';
+          break;
+        }
+        line = chunk;
+      }
+
+      if (line && lines.length < maxLines) lines.push(line);
+      if (lines.length && consumed < source.length) {
+        lines[lines.length - 1] = fitCanvasText(`${lines[lines.length - 1]}...`, maxWidth);
+      }
+      return lines;
+    }
+
+    function fitCanvasText(text, maxWidth) {
+      let value = text;
+      while (value.length > 1 && ctx.measureText(value).width > maxWidth) {
+        value = `${value.slice(0, -4)}...`;
+      }
+      return value;
     }
 
     function canvasPoint(event) {
